@@ -81,6 +81,7 @@ struct MySolver : public Context {
             Arm arm;
             arm.mount_point = mount_points[minIdx];
             arm.tasks.push_back(task_id);
+            arm.instr.resize(currentSteps, 'W');
             int new_steps = get_sequence(mount_points[minIdx], task, arm.instr);
             if (currentSteps + new_steps > steps) {
                 return false;
@@ -107,6 +108,7 @@ struct MySolver : public Context {
             int new_steps = get_sequence(arm.mount_point, task, arm.instr);
             if (currentSteps + new_steps > steps) {
                 arm.instr.resize(old_size);
+                arm.tasks.pop_back();
                 return false;
             } else {
                 add_waits(new_steps, minIdx);

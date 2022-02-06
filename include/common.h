@@ -173,13 +173,15 @@ struct Context {
                     field[node.x][node.y] = i + 1; 
                 }
             }
-            // cout << "after step " << t << endl;
-            // forn(i, width) {
-            //     forn(j, height) {
-            //         cout << field[i][j];
-            //     }
-            //     cout << endl;
-            // }
+            /*
+            cout << "after step " << t << endl;
+            forn(i, width) {
+                forn(j, height) {
+                    cout << field[i][j];
+                }
+                cout << endl;
+            }
+            */
         } 
         forn(i, arms.size()) {
             pii expected = {arms[i].tasks.size(), 0};
