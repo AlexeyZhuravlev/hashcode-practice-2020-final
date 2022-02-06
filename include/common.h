@@ -89,6 +89,7 @@ struct Context {
     }
 
     void Output() {
+        return;
         cout << arms.size() << endl;
         for (const Arm& arm: arms) {
             cout << arm.mount_point.x << " " << arm.mount_point.y <<
@@ -168,7 +169,12 @@ struct Context {
             vector<vi> field(width, vi(height));
             forn(i, arms.size()) {
                 for (auto node: nodes[i]) {
-                    // cout << "node " << node.x << " " << node.y << endl;
+                    if (field[node.x][node.y] != 0) {
+                        cout << "node " << node.x << " " << node.y << " color " << field[node.x][node.y] << " i = " << i << endl;
+                        for (auto elem: nodes[i]) {
+                            cout << elem.x << " " << elem.y << endl;
+                        }
+                    }
                     assert(field[node.x][node.y] == 0 && "cell is already occupied");
                     field[node.x][node.y] = i + 1; 
                 }
