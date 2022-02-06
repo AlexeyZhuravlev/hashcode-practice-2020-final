@@ -155,19 +155,8 @@ struct MySolver : public Context {
                 sequence.push_back('D');
                 current.y -= 1;
             } else {
-                if (!mountPointsOccupied[current.y][current.x + 1]) {
-                    sequence.push_back('R');
-                    current.x += 1;
-                } else if (!mountPointsOccupied[current.y][current.x - 1]) {
-                    sequence.push_back('L');
-                    current.x -= 1;
-                } else if (!mountPointsOccupied[current.y + 1][current.x]) {
-                    sequence.push_back('U');
-                    current.y += 1;
-                } else {
-                    sequence.push_back('D');
-                    current.y -= 1;
-                }
+                sequence.resize(sequence.size() + 10000, 'R');
+                return;
             }
         }
     }
