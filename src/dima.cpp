@@ -16,6 +16,18 @@
 
 using namespace std;
 
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+#define li long long
+#define pii pair<int, int>
+#define vi vector<int>
+
+#define forn(i, n) for (int i = 0; i < (int)n; i++)
+#define fore(i, b, e) for (int i = (int)b; i <= (int)e; i++)
+#define all(x) (x).begin(), (x).end()
+
 struct MySolver : public Context {
     void Solve() {
         // Solution goes here
