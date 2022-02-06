@@ -107,6 +107,7 @@ struct MySolver : public Context {
             int new_steps = get_sequence(arm.mount_point, task, arm.instr);
             if (currentSteps + new_steps > steps) {
                 arm.instr.resize(old_size);
+                arm.tasks.pop_back();
                 return false;
             } else {
                 add_waits(new_steps, minIdx);
