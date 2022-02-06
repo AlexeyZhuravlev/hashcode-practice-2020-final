@@ -38,7 +38,8 @@ struct Task {
 };
 
 struct Arm {
-    int x, y, tasks_num, instr_num;
+    Point mount_point;
+    int tasks_num, instr_num;
     vector<int> tasks;
     vector<char> instr;
 };
@@ -73,7 +74,8 @@ struct Context {
     void Output() {
         cout << arms.size() << endl;
         for (const Arm& arm: arms) {
-            cout << arm.x << " " << arm.y << " " << arm.tasks_num << " " << arm.instr_num << endl;
+            cout << arm.mount_point.x << " " << arm.mount_point.y <<
+                 " " << arm.tasks_num << " " << arm.instr_num << endl;
             for (int task: arm.tasks) {
                 cout << task << " ";
             }
@@ -85,8 +87,18 @@ struct Context {
         }
     }
 
-    uint64_t GetScore() {
+    bool valid(const Point& p) {
+        return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
+    }
 
+
+    uint64_t GetScore() {
+        assert(arms.size() > 0 && (int)arms.size() <= arms_num && "arm number should be <= R");
+        for (const Arm& arm: arms) {
+            assert(valid(arm.mount_point));
+            assert(arm.tasks.size() > 0 && (int)arm.tasks.size() <= tasks_num && "number of tasks should be > 0 and <= T");
+            assert(arm.instr.size() > 0 && (int)arm.instr.size() <= steps && "number of instructions should be > 0 and <= L");
+        }
         return 0;
     }
     
