@@ -136,10 +136,10 @@ struct Context {
                     continue;
                 }
                 Point new_node = nodes[i].back();
+                new_node.apply(arm.instr[t]);
                 assert(valid(new_node) && "moving outside the field");
                 // cout << new_node.x << " " << new_node.y << endl;
                 assert((set_mount_points.count(new_node) == 0 || new_node == arm.mount_point) && "can't visit other mount points");
-                new_node.apply(arm.instr[t]);
 
                 while (task_state[i].fi < (int)arm.tasks.size()) {
                     int task_id = arm.tasks[task_state[i].fi];
