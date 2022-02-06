@@ -138,7 +138,7 @@ struct Context {
                 Point new_node = nodes[i].back();
                 new_node.apply(arm.instr[t]);
                 assert(valid(new_node) && "moving outside the field");
-                cout << new_node.x << " " << new_node.y << endl;
+                // cout << new_node.x << " " << new_node.y << endl;
                 assert((set_mount_points.count(new_node) == 0 || new_node == arm.mount_point) && "can't visit other mount points");
 
                 while (task_state[i].fi < (int)arm.tasks.size()) {
@@ -173,16 +173,17 @@ struct Context {
                     field[node.x][node.y] = i + 1; 
                 }
             }
-            cout << "after step " << t << endl;
-            forn(i, width) {
-                forn(j, height) {
-                    cout << field[i][j];
-                }
-                cout << endl;
-            }
+            // cout << "after step " << t << endl;
+            // forn(i, width) {
+            //     forn(j, height) {
+            //         cout << field[i][j];
+            //     }
+            //     cout << endl;
+            // }
         } 
         forn(i, arms.size()) {
             pii expected = {arms[i].tasks.size(), 0};
+            
             assert((task_state[i] == expected) && "not all tasks are done");
         }
         li total_score = 0;
