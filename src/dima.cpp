@@ -30,7 +30,15 @@ using namespace std;
 
 struct MySolver : public Context {
     void Solve() {
-        // Solution goes here
+        Arm arm {{1, 1}};
+        arm.tasks.pb(0);
+        arm.instr = {'U', 'R', 'W', 'U', 'R'};
+        arms.pb(arm);
+
+        Arm second_arm{{1, 3}};
+        second_arm.tasks.pb(2);
+        second_arm.instr = {'R', 'R', 'L', 'L'};
+        arms.pb(second_arm);
     }
 };
 
