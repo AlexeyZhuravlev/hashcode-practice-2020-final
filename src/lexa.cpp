@@ -93,6 +93,7 @@ struct MySolver : public Context {
                 return true;
             }
         } else {
+            return false;
             int minIdx = -1;
             int minDist = 5000;
             forn(i, arms.size()) {
@@ -143,17 +144,19 @@ struct MySolver : public Context {
 
     void get_point_sequence(const Point& a, const Point& b, vector<char>& sequence) {
         Point current = a;
+        vector<vector<char> > currentOccupied = mountPointsOccupied;
         while ((current.x != b.x) or (current.y != b.y)) {
-            if ((current.x < b.x) and !mountPointsOccupied[current.y][current.x + 1]) {
+            currentOccupied[current.y][current.x] = 1;
+            if ((current.x < b.x) and !currentOccupied[current.y][current.x + 1]) {
                 sequence.push_back('R');
                 current.x += 1;
-            } else if ((current.x > b.x) and !mountPointsOccupied[current.y][current.x - 1]) {
+            } else if ((current.x > b.x) and !currentOccupied[current.y][current.x - 1]) {
                 sequence.push_back('L');
                 current.x -= 1;
-            } else if ((current.y < b.y) and !mountPointsOccupied[current.y + 1][current.x]) {
+            } else if ((current.y < b.y) and !currentOccupied[current.y + 1][current.x]) {
                 sequence.push_back('U');
                 current.y += 1;
-            } else if ((current.y > b.y) and !mountPointsOccupied[current.y - 1][current.x]) {
+            } else if ((current.y > b.y) and !currentOccupied[current.y - 1][current.x]) {
                 sequence.push_back('D');
                 current.y -= 1;
             } else {
