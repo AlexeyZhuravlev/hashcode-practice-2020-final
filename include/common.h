@@ -138,7 +138,7 @@ struct Context {
                 Point new_node = nodes[i].back();
                 new_node.apply(arm.instr[t]);
                 assert(valid(new_node) && "moving outside the field");
-                // cout << new_node.x << " " << new_node.y << endl;
+                cout << new_node.x << " " << new_node.y << endl;
                 assert((set_mount_points.count(new_node) == 0 || new_node == arm.mount_point) && "can't visit other mount points");
 
                 while (task_state[i].fi < (int)arm.tasks.size()) {
@@ -153,11 +153,12 @@ struct Context {
                     }
                 }
 
-                if (nodes.size() == 1) {
+                if (nodes[i].size() == 1) {
                     nodes[i].pb(new_node);
                     continue;
                 }
                 Point last_but_one = nodes[i][nodes[i].size() - 2];
+                // cout << "last but one " << last_but_one.x << " " << last_but_one.y << endl;
                 if (last_but_one == new_node) {
                     nodes[i].pop_back();
                 } else {
@@ -167,6 +168,7 @@ struct Context {
             vector<vi> field(width, vi(height));
             forn(i, arms.size()) {
                 for (auto node: nodes[i]) {
+                    // cout << "node " << node.x << " " << node.y << endl;
                     assert(field[node.x][node.y] == 0 && "cell is already occupied");
                     field[node.x][node.y] = i + 1; 
                 }
