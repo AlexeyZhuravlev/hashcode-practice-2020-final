@@ -33,12 +33,12 @@ struct Point {
 };
 
 struct Task {
-    int s, p;
+    int s, points_num;
     vector<Point> points;
 };
 
 struct Arm {
-    int x, y, z, k;
+    int x, y, tasks_num, instr_num;
     vector<int> tasks;
     vector<char> instr;
 };
@@ -46,7 +46,7 @@ struct Arm {
 struct Context {
     using TSolution = int;
     TSolution Solution;
-    int w, h, r, m, t, l;
+    int width, height, arms_num, mount_points_num, tasks_num, steps;
     vector<Point> mount_points;
     vector<Task> tasks;
 
@@ -54,17 +54,17 @@ struct Context {
     vector<Arm> arms;
 
     void Input() {
-        cin >> w >> h >> r >> m >> t >> l;
-        mount_points.resize(m);
-        forn(i, m) {
+        cin >> width >> height >> arms_num >> mount_points_num >> tasks_num >> steps;
+        mount_points.resize(mount_points_num);
+        forn(i, mount_points_num) {
             cin >> mount_points[i].x >> mount_points[i].y;
         }
-        tasks.resize(t);
-        forn(i, t) {
+        tasks.resize(tasks_num);
+        forn(i, tasks_num) {
             Task& task = tasks[i];
-            cin >> task.s >> task.p;
-            task.points.resize(task.p);
-            forn(j, task.p) {
+            cin >> task.s >> task.points_num;
+            task.points.resize(task.points_num);
+            forn(j, task.points_num) {
                 cin >> task.points[j].x >> task.points[j].y;
             }
         }
@@ -73,7 +73,7 @@ struct Context {
     void Output() {
         cout << arms.size() << endl;
         for (const Arm& arm: arms) {
-            cout << arm.x << " " << arm.y << " " << arm.z << " " << arm.k << endl;
+            cout << arm.x << " " << arm.y << " " << arm.tasks_num << " " << arm.instr_num << endl;
             for (int task: arm.tasks) {
                 cout << task << " ";
             }
@@ -86,6 +86,7 @@ struct Context {
     }
 
     uint64_t GetScore() {
+
         return 0;
     }
     
