@@ -185,6 +185,7 @@ struct Context {
         } 
         forn(i, arms.size()) {
             pii expected = {arms[i].tasks.size(), 0};
+            
             assert((task_state[i] == expected) && "not all tasks are done");
         }
         li total_score = 0;
