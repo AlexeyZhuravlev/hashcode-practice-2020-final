@@ -143,6 +143,7 @@ struct MySolver : public Context {
     }
 
     void get_point_sequence(const Point& a, const Point& b, vector<char>& sequence, vector<vector<char> >& currentOccupied) {
+        // TODO: add A*
         Point current = a;
         while ((current.x != b.x) or (current.y != b.y)) {
             currentOccupied[current.y][current.x] = 1;
