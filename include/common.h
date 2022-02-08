@@ -62,14 +62,11 @@ struct Arm {
 };
 
 struct Context {
-    using TSolution = int;
+    using TSolution = vector<Arm>;
     TSolution Solution;
     int width, height, arms_num, mount_points_num, tasks_num, steps;
     vector<Point> mount_points;
     vector<Task> tasks;
-
-    // answer    
-    vector<Arm> arms;
 
     void Input() {
         cin >> width >> height >> arms_num >> mount_points_num >> tasks_num >> steps;
@@ -89,7 +86,7 @@ struct Context {
     }
 
     void Output() {
-        return;
+        TSolution& arms = Solution;
         cout << arms.size() << endl;
         for (const Arm& arm: arms) {
             cout << arm.mount_point.x << " " << arm.mount_point.y <<
@@ -111,6 +108,7 @@ struct Context {
 
 
     uint64_t GetScore() {
+        TSolution& arms = Solution;
         set<Point> set_mount_points(all(mount_points));
         assert(arms.size() > 0 && (int)arms.size() <= arms_num && "arm number should be <= R");
         set<int> assigned_tasks;
@@ -200,7 +198,6 @@ struct Context {
                 total_score += tasks[t].s;
             }
         }
-        cerr << "total score " << total_score << endl;
         return total_score;
     }
     
