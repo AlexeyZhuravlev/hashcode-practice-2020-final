@@ -148,7 +148,7 @@ struct MySolver : public Context {
         return true;
     }
 
-    void RandomSearch() {
+    void RandomSearch(int global_steps, int local_steps) {
         mt19937 gen(42);
         uniform_int_distribution<int> distrib(0, mount_points_num - 1);
 
@@ -160,7 +160,7 @@ struct MySolver : public Context {
         vector<Point> best_order;
         uniform_real_distribution<double> dist(0, 2.0);
 
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < global_steps; ++i) {
             shuffle(mount_points.begin(), mount_points.end(), gen);
             coeff = dist(gen);
             Solve();
@@ -170,8 +170,8 @@ struct MySolver : public Context {
                 maxScore = score;
                 best_order = mount_points;
                 bestCoeff = coeff;
+                cerr << "Iteration " << i << " score " << maxScore << endl;
             }
-            cerr << "Iteration " << i << " score " << maxScore << endl;
         }
 
         cerr << "Optimal alpha: " << bestCoeff << endl;
@@ -180,7 +180,7 @@ struct MySolver : public Context {
 
         coeff = bestCoeff;
         mount_points = best_order;
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < local_steps; ++i) {
             int first = distrib(gen);
             int second = distrib(gen);
             swap(mount_points[first], mount_points[second]);
@@ -189,25 +189,24 @@ struct MySolver : public Context {
             if (score > maxScore) {
                 bestSolution = Solution;
                 maxScore = score;
+                cerr << "Iteration " << i << " score " << maxScore << endl;
             } else {
                 swap(mount_points[first], mount_points[second]);
             }
-
-            cerr << "Iteration " << i << " score " << maxScore << endl;
         }
 
         Solution = bestSolution;
     }
 };
 
-int main() {
+int main(int argc, char** argv) {
     MySolver solver;
 
     solver.Input();
 
     auto start = std::chrono::system_clock::now();
     cerr << "Started solving..." << endl;
-    solver.RandomSearch();
+    solver.RandomSearch(atoi(argv[1]), atoi(argv[2]));
     cerr << "Done!" << endl;
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
