@@ -13,25 +13,28 @@
 #include <map>
 #include <cstdlib>
 #include <chrono>
+#include <random>
 
 using namespace std;
 
 struct MySolver : public Context {
     vector<vector<char> > mountPointsOccupied;
-    vector<char> mountPointsUsed;
+    vector<char> tasks_used;
     map<char, char> rev;
-
-    int currentSteps;
+    double coeff = 1.0;
 
     void Solve() {
+
+        TSolution& arms = Solution;
+        arms.clear();
+
         rev['U'] = 'D';
         rev['D'] = 'U';
         rev['L'] = 'R';
         rev['R'] = 'L';
 
-        currentSteps = 0;
-        mountPointsUsed.resize(mount_points_num, 0);
-        mountPointsOccupied.resize(height, vector<char>(width, 0));
+        tasks_used.assign(tasks_num, 0);
+        mountPointsOccupied.assign(height, vector<char>(width, 0));
         forn (i, mount_points_num) {
             mountPointsOccupied[mount_points[i].y][mount_points[i].x] = 1;
         }
@@ -42,10 +45,42 @@ struct MySolver : public Context {
             prioritized_tasks.push_back(make_pair(score, i));
         }
         sort(prioritized_tasks.rbegin(), prioritized_tasks.rend());
-        forn(i, tasks_num) {
-            int task_id = prioritized_tasks[i].second;
-            if (!add_task(task_id)) {
-                continue;
+
+        int mount_point = 0;
+        while (arms.size() < arms_num) {
+            Arm arm;
+            arm.mount_point = mount_points[mount_point];
+            forn(j, tasks_num) {
+                int task_id = prioritized_tasks[j].second;
+                if (!tasks_used[task_id] && add_task_to_arm(task_id, arm)) {
+                    tasks_used[task_id] = 1;
+                }
+            }
+            if (arm.tasks.size() > 0) {
+                arms.push_back(arm);
+                Point current = arm.mount_point;
+                forn(i, arm.instr.size()) {
+                    switch (arm.instr[i])
+                    {
+                        case 'L':
+                            current.x -= 1;
+                            break;
+                        case 'R':
+                            current.x += 1;
+                            break;
+                        case 'U':
+                            current.y += 1;
+                            break;
+                        case 'D':
+                            current.y -= 1;
+                            break;
+                    }
+                    mountPointsOccupied[current.y][current.x] = 1;
+                }
+            }
+            mount_point += 1;
+            if (mount_point >= mount_points_num) {
+                break;
             }
         }
     }
@@ -55,115 +90,111 @@ struct MySolver : public Context {
         for (int i = 1; i < task.points_num; ++i) {
             sum_inner_length += distance(task.points[i], task.points[i - 1]);
         }
-
-        return double(task.s) / (sum_inner_length + 1);
+        return double(task.s) - coeff * sum_inner_length;
     }
 
     int distance(const Point& a, const Point& b) {
         return abs(a.x - b.x) + abs(a.y - b.y);
     }
 
-    bool add_task(int task_id) {
+    bool add_task_to_arm(int task_id, Arm& arm) {
         const Task& task = tasks[task_id];
-        if (arms.size() < arms_num) {
-            int minIdx = -1;
-            int minDist = 5000;
-            forn(i, mount_points_num) {
-                if (mountPointsUsed[i]) {
-                    continue;
-                }
-                int dist = distance(task.points[0], mount_points[i]);
-                if (dist < minDist) {
-                    minDist = dist;
-                    minIdx = i;
-                }
-            }
-            Arm arm;
-            arm.mount_point = mount_points[minIdx];
-            arm.tasks.push_back(task_id);
-            arm.instr.resize(currentSteps, 'W');
-            int new_steps = get_sequence(mount_points[minIdx], task, arm.instr);
-            if (currentSteps + new_steps > steps) {
-                return false;
-            } else {
-                add_waits(new_steps, -1);
-                arms.push_back(arm);
-                currentSteps += new_steps;
-                mountPointsUsed[minIdx] = 1;
-                return true;
-            }
-        } else {
-            int minIdx = -1;
-            int minDist = 5000;
-            forn(i, arms.size()) {
-                int dist = distance(task.points[0], arms[i].mount_point);
-                if (dist < minDist) {
-                    minDist = dist;
-                    minIdx = i;
-                }
-            }
-            Arm& arm = arms[minIdx];
-            arm.tasks.push_back(task_id);
-            int old_size = arm.instr.size();
-            int new_steps = get_sequence(arm.mount_point, task, arm.instr);
-            if (currentSteps + new_steps > steps) {
+
+        int old_size = arm.instr.size();
+
+        int current_size = arm.instr.size();
+
+        forn (i, task.points_num) {
+            if (!get_point_sequence(arm.mount_point, task.points[i], arm.instr)) {
                 arm.instr.resize(old_size);
-                arm.tasks.pop_back();
                 return false;
-            } else {
-                add_waits(new_steps, minIdx);
-                currentSteps += new_steps;
-                return true;
             }
-        }
-    }
-
-    void add_waits(int wait_length, int ignore_idx) {
-        forn (i, arms.size()) {
-            if (i == ignore_idx) {
-                continue;
+            int new_size = arm.instr.size();
+            for (int j = new_size - 1; j >= current_size; --j) {
+                arm.instr.push_back(rev[arm.instr[j]]);
             }
-            arms[i].instr.resize(arms[i].instr.size() + wait_length, 'W');
+            current_size = arm.instr.size();
+        }
+
+        if (arm.instr.size() >= steps) {
+            arm.instr.resize(old_size);
+            return false;
+        } else {
+            arm.tasks.push_back(task_id);
+            return true;
         }
     }
 
-    int get_sequence(const Point& point, const Task& task, vector<char>& sequence) {
-        int start_size = sequence.size();
-        Point current = point;
-        vector<vector<char> > currentOccupied = mountPointsOccupied;
-        forn(i, task.points_num) {
-            get_point_sequence(current, task.points[i], sequence, currentOccupied);
-            current = task.points[i];
-        }
-        int new_size = sequence.size();
-        for (int i = new_size - 1; i >= start_size; --i) {
-            sequence.push_back(rev[sequence[i]]);
-        }
-        return sequence.size() - start_size;
-    }
-
-    void get_point_sequence(const Point& a, const Point& b, vector<char>& sequence, vector<vector<char> >& currentOccupied) {
+    bool get_point_sequence(const Point& a, const Point& b, vector<char>& sequence) {
         // TODO: add A* (...)
         Point current = a;
-        while ((current.x != b.x) or (current.y != b.y)) {
-            currentOccupied[current.y][current.x] = 1;
-            if ((current.x < b.x) and !currentOccupied[current.y][current.x + 1]) {
+        while ((current.x != b.x) || (current.y != b.y)) {
+            if ((current.x < b.x) and !mountPointsOccupied[current.y][current.x + 1]) {
                 sequence.push_back('R');
                 current.x += 1;
-            } else if ((current.x > b.x) and !currentOccupied[current.y][current.x - 1]) {
+            } else if ((current.x > b.x) and !mountPointsOccupied[current.y][current.x - 1]) {
                 sequence.push_back('L');
                 current.x -= 1;
-            } else if ((current.y < b.y) and !currentOccupied[current.y + 1][current.x]) {
+            } else if ((current.y < b.y) and !mountPointsOccupied[current.y + 1][current.x]) {
                 sequence.push_back('U');
                 current.y += 1;
-            } else if ((current.y > b.y) and !currentOccupied[current.y - 1][current.x]) {
+            } else if ((current.y > b.y) and !mountPointsOccupied[current.y - 1][current.x]) {
                 sequence.push_back('D');
                 current.y -= 1;
             } else {
-                sequence.resize(sequence.size() + 10000, 'R');
-                return;
+                return false;
             }
         }
+        return true;
+    }
+
+    void RandomSearch() {
+        mt19937 gen(42);
+        uniform_int_distribution<int> distrib(0, mount_points_num - 1);
+
+        cerr << "Global optimizations" << endl;
+
+        uint64_t maxScore = 0;
+        double bestCoeff;
+        TSolution bestSolution;
+        vector<Point> best_order;
+        uniform_real_distribution<double> dist(0, 2.0);
+
+        for (int i = 0; i < 50; ++i) {
+            shuffle(mount_points.begin(), mount_points.end(), gen);
+            coeff = dist(gen);
+            Solve();
+            uint64_t score = GetScore();
+            if (score > maxScore) {
+                bestSolution = Solution;
+                maxScore = score;
+                best_order = mount_points;
+                bestCoeff = coeff;
+            }
+            cerr << "Iteration " << i << " score " << maxScore << endl;
+        }
+
+        cerr << "Local optimizations" << endl;
+
+        coeff = bestCoeff;
+        mount_points = best_order;
+        for (int i = 0; i < 5000; ++i) {
+            int first = distrib(gen);
+            int second = distrib(gen);
+            swap(mount_points[first], mount_points[second]);
+            Solve();
+            uint64_t score = GetScore();
+            if (score > maxScore) {
+                bestSolution = Solution;
+                maxScore = score;
+            } else {
+                swap(mount_points[first], mount_points[second]);
+            }
+
+            cerr << "Iteration " << i << " score " << maxScore << endl;
+        }
+
+        Solution = bestSolution;
     }
 };
 
@@ -174,7 +205,7 @@ int main() {
 
     auto start = std::chrono::system_clock::now();
     cerr << "Started solving..." << endl;
-    solver.Solve();
+    solver.RandomSearch();
     cerr << "Done!" << endl;
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
