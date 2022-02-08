@@ -174,11 +174,13 @@ struct MySolver : public Context {
             cerr << "Iteration " << i << " score " << maxScore << endl;
         }
 
+        cerr << "Optimal alpha: " << bestCoeff << endl;
+
         cerr << "Local optimizations" << endl;
 
         coeff = bestCoeff;
         mount_points = best_order;
-        for (int i = 0; i < 5000; ++i) {
+        for (int i = 0; i < 50; ++i) {
             int first = distrib(gen);
             int second = distrib(gen);
             swap(mount_points[first], mount_points[second]);
